@@ -6,10 +6,12 @@ https://github.com/thorstadt/bifrost
 
 you can use it to build a simple ftp server.
 
+=============================================
 step:
 
 1) build:
 1. make  (will get deps)
+
 
 2) make release:
 1. make release
