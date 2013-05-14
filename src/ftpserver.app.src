@@ -1,0 +1,13 @@
+{application, ftpserver,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { ftpserver_app, []}},
+  {env, []}
+ ]}.
+ 
