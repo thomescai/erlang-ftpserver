@@ -36,9 +36,9 @@ init(InitialState, _) ->
     InitialState.
 
 login(State=#connection_state{users=Users}, Username, Password) ->
-	Temp = {Username,Password},
-	Login = lists:member(Temp, Users),
-	?INFO_F("~p --- isLogin:~p ~n",[?MODULE,Login]),
+%% 	Temp = {Username,Password},
+%% 	Login = lists:member(Temp, Users),
+%% 	?INFO_F("~p --- isLogin:~p ~n",[?MODULE,Login]),
     {true, State}.
 
 current_directory(State) ->
@@ -117,11 +117,12 @@ list_files(State, "-al") ->
 	{error, State};
 list_files(State, _Directory) ->
 	Target = [State#connection_state.root_dir,State#connection_state.current_dir],
+	FileDir = filename:join([Target]),
 	
-	case file:list_dir(Target) of
+	case file:list_dir(FileDir) of
 		{ok,FileList} ->
 			FileInfoList = lists:foldl(fun(FileName, AccIn) -> 
-						FilePath = filename:join(Target,FileName),
+						FilePath = filename:join(FileDir,FileName),
 						{ok,FileInfo} = file:read_file_info(FilePath),
 						[{FileInfo,FileName}|AccIn]
 						end, [], FileList),

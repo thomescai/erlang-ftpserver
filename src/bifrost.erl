@@ -22,7 +22,7 @@ start_link(HookModule, Opts) ->
 init([HookModule, Opts]) ->
 	
     Port = config:get_opt(port, Opts, ?DEFAULT_PORT),
-	RootDir = config:get_opt(root_dir, Opts, ?DEFAULT_ROOT_DIR),
+	RootDir = config:get_opt(root_dir, Opts),
 	Users = config:get_opt(users, Opts),
 	Ssl = config:get_opt(ssl, Opts, false),
     SslKey = config:get_opt(ssl_key, Opts),
@@ -206,7 +206,7 @@ pasv_connection(ControlSocket, State) ->
                      State#connection_state{pasv_listen=PasvSocketInfo}};
                 {error, Error} ->
                     respond(ControlSocket, 425),
-					?DEBUG_F("~p --- pasv_connection,error:~p ~n",[Error]),
+					?DEBUG_F("~p --- pasv_connection,error:~p ~n",[?MODULE,Error]),
                     {ok, State}
             end
     end.
@@ -274,6 +274,16 @@ ftp_command(_, Socket, State, port, Arg) ->
          _ ->
             respond(Socket, 452, "Error parsing address.")
         end;
+
+ftp_command(Mod, Socket, State, noop, Arg) ->
+    case Mod:login(State, State#connection_state.user_name, Arg) of
+        {true, NewState} -> 
+            respond(Socket, 200),
+            {ok, NewState};
+        _ ->
+            respond(Socket, 530, "server close."),
+            {error, closed}
+     end;
 
 ftp_command(Mod, Socket, State, pass, Arg) ->
     case Mod:login(State, State#connection_state.user_name, Arg) of
@@ -534,6 +544,7 @@ parse_input(Input) ->
 
 list_files_to_socket(DataSocket, Files) ->
     lists:map(fun({Info,Name}) -> 
+					  ?INFO_F("~p ~n",[Info]),
                       bf_send(DataSocket, 
                               file_info_to_string(Info)++ " " ++ Name ++ "\r\n") end,
               Files),
