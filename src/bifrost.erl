@@ -30,7 +30,7 @@ init([HookModule, Opts]) ->
     CaSslCert = config:get_opt(ca_ssl_cert, Opts),
     case listen_socket(Port, [{active, false}, {reuseaddr, true}, list]) of
         {ok, Listen} ->
-            IpAddress = config:get_opt(ip_address, Opts, get_socket_addr(Listen)),
+            IpAddress = config:get_opt(ip_address, Opts, ?DEFAULT_LOCAL_HOST),
 			IpTemp = parse_ip(IpAddress),
             InitialState = #connection_state{module=HookModule,
                                              ip_address=IpTemp,

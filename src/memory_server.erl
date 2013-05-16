@@ -84,8 +84,20 @@ remove_file(State, File) ->
 			{error, Reason}
 	end.
 
-rename_file(_State, _FromPath, _ToPath) ->
-    {error, not_supported}.
+rename_file(State, FromPath, ToPath) ->
+	TargetFromPath = [State#connection_state.root_dir,State#connection_state.current_dir,"/",FromPath],
+	FileFromPath = filename:join([TargetFromPath]),
+	
+	TargetToPath = [State#connection_state.root_dir,State#connection_state.current_dir,"/",ToPath],
+	FileToPath = filename:join([TargetToPath]),
+	
+	case file:rename(FileFromPath, FileToPath) of
+		ok ->
+			{ok,State};
+		{error,Reason} ->
+			?ERROR_F("~p --- rename_file,error:~p ~n",[?MODULE,Reason]),
+			{error, rename_error}
+	end.		
 
 remove_directory(State, Directory) ->
 	Target = [State#connection_state.root_dir,State#connection_state.current_dir,Directory],
