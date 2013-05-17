@@ -15,6 +15,7 @@
          remove_file/2, 
          put_file/4, 
          get_file/2,
+		 rest/2,
          file_info/2,
          rename_file/3,
          site_command/3,
@@ -147,13 +148,23 @@ put_file(State, ProvidedFileName, _Mode, FileRetrievalFun) ->
     {ok, State}.
 
     
-get_file(State, Path) ->
+get_file(State = #connection_state{offset=Offset}, Path) ->
+	?INFO_F("1111111: ~p ~n",[Offset]),
+	
 	Target = State#connection_state.root_dir ++ State#connection_state.current_dir ++ "/" ++ Path,
 	FilePath = filename:join([Target]),
 	
 	{ok,DataFD} = prim_file:open(FilePath,?OPEN_FILE_OPTIONS),
-    {ok, reading_fun(State, DataFD)}.
+    {ok, reading_fun(State, DataFD, Offset)}.
+	
 
+rest(State,"0") ->
+	{ok,State};
+rest(State,"100") ->
+	{ok,State#connection_state{offset=0}};
+rest(State,Arg) ->
+	{Offset,_} = string:to_integer(Arg),
+	{ok, State#connection_state{offset=Offset}}.
 
 file_info(State, Path) ->
 	?INFO_F("~p ~n",["file_info"]),
@@ -180,6 +191,12 @@ write_from_fun(DataFD, Count, Fun) ->
             io:format("DONE!"),
             {ok, Count}
     end.
+
+reading_fun(State, DataFD, "0") ->
+	reading_fun(State, DataFD);
+reading_fun(State, DataFD, Offset) ->
+	{ok,_} = prim_file:position(DataFD, Offset),
+	reading_fun(State, DataFD).
 
 reading_fun(State, DataFD) ->
 	fun(ByteCount) ->

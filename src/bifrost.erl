@@ -449,6 +449,23 @@ ftp_command(Mod, Socket, State, help, Arg) ->
             {ok, State}
     end;
 
+ftp_command(Mod, Socket, State, rest, Arg) ->
+    try 
+        case Mod:rest(State, Arg) of
+              {ok, NewState} ->
+                  respond(Socket, 200),
+                  {ok, NewState};
+              error ->
+                  respond(Socket, 550),
+                  {ok, State}
+        end
+    catch
+        _ -> 
+              respond(Socket, 550),
+              {ok, State}
+    end;
+
+
 ftp_command(Mod, Socket, State, retr, Arg) ->
     try 
         case Mod:get_file(State, Arg) of

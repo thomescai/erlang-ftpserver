@@ -12,6 +12,7 @@
           module_state,
 		  root_dir = "",
 		  current_dir = "/",
+		  offset = 0,
           ssl_allowed = false,
           ssl_cert = undefined,
           ssl_key = undefined,

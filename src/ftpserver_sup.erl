@@ -18,7 +18,8 @@
 %% ===================================================================
 
 start_link() ->
-%% 	bifrost:start_link(memory_server, []).
+%% 	Opts = [{root_dir,"/home/workspace/test"}].
+%% 	bifrost:start_link(memory_server, Opts).
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
