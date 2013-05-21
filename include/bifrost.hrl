@@ -43,7 +43,6 @@
 
 
 -define (DEFAULT_PORT, 21).
--define (DEFAULT_LOCAL_HOST, '127.0.0.1').
 
 -define(FILE_PRE_READ_TOM(X),X*1024*1024).
 -define (DEFAULT_ROOT_DIR, "").

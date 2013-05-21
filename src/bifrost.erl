@@ -30,10 +30,9 @@ init([HookModule, Opts]) ->
     CaSslCert = config:get_opt(ca_ssl_cert, Opts),
     case listen_socket(Port, [{active, false}, {reuseaddr, true}, list]) of
         {ok, Listen} ->
-            IpAddress = config:get_opt(ip_address, Opts, ?DEFAULT_LOCAL_HOST),
-			IpTemp = parse_ip(IpAddress),
+			{ok,[{addr,IpAddress}]} = inet:ifget("eth0", [addr]),
             InitialState = #connection_state{module=HookModule,
-                                             ip_address=IpTemp,
+                                             ip_address=IpAddress,
 											 users = Users,
 											 root_dir = RootDir,
                                              ssl_allowed=Ssl,
@@ -393,10 +392,17 @@ ftp_command(Mod, Socket, State, stor, Arg) ->
                           done
                   end
           end,
-    {ok, NewState} = Mod:put_file(State, Arg, write, Fun),
-    respond(Socket, 226),
-    bf_close(DataSocket),
-    {ok, NewState};
+	case Mod:put_file(State, Arg, write, Fun) of
+		{ok, NewState} ->
+			respond(Socket, 226),
+    		bf_close(DataSocket),
+    		{ok, NewState};
+		{error,_} ->
+			respond(Socket, 450, "Unable to stor file"),
+			bf_close(DataSocket),
+			{ok, State}
+	end;
+   
 
 ftp_command(_, Socket, State, type, Arg) ->
     case Arg of

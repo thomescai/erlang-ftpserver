@@ -141,16 +141,18 @@ put_file(State, ProvidedFileName, _Mode, FileRetrievalFun) ->
 	Target = [State#connection_state.root_dir,State#connection_state.current_dir,"/",ProvidedFileName],
 	FilePath = filename:join([Target]),
 	
-	{ok,DataFD} = prim_file:open(FilePath,?WRITE_FILE_OPTIONS),
-	{ok, _Count} = write_from_fun(DataFD,FileRetrievalFun),
-	prim_file:close(DataFD),
-	
-    {ok, State}.
+	case prim_file:open(FilePath,?WRITE_FILE_OPTIONS) of
+		{ok,DataFD} ->
+			{ok, _Count} = write_from_fun(DataFD,FileRetrievalFun),
+			prim_file:close(DataFD),
+			{ok, State};
+		{error, Reason} ->
+			?INFO_F("~p -- put file error:~p ~n",[?MODULE,Reason]),
+			{error, Reason}
+	end.
 
     
 get_file(State = #connection_state{offset=Offset}, Path) ->
-	?INFO_F("1111111: ~p ~n",[Offset]),
-	
 	Target = State#connection_state.root_dir ++ State#connection_state.current_dir ++ "/" ++ Path,
 	FilePath = filename:join([Target]),
 	
