@@ -6,7 +6,7 @@ https://github.com/thorstadt/bifrost
 
 you can use it to build a simple ftp server.
 
-suport for:SmartFTP Client,FlashFXP.
+suport for:ie, SmartFTP Client, FlashFXP.
 
 =============================================
 step:
